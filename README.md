@@ -132,6 +132,14 @@ bunx create-next-app --example https://github.com/trpc/trpc --example-path examp
   </tbody>
 </table>
 
+### You? 👀
+
+Ready to make a difference? Dive into tRPC and become a key player in shaping the future of APIs.
+
+🗨️ Join the conversation on [Discord](https://trpc.io/discord) - Check out the [#contributing](https://discord.com/channels/867764511159091230/980118117676118067) channel!
+
+Let's shape the future of typesafe APIs together! Happy coding! 🚀
+
 ## Sponsors
 
 If you enjoy working with tRPC and want to support me consider giving a token appreciation by [GitHub Sponsors](https://trpc.io/sponsor)!
