@@ -2,7 +2,7 @@
 const config = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['no-only-tests', 'unicorn', 'turbo'],
+  plugins: ['no-only-tests', 'unicorn', 'turbo', 'import'],
   extends: [
     'plugin:@typescript-eslint/recommended-type-checked',
     'plugin:@typescript-eslint/stylistic-type-checked',
@@ -35,8 +35,16 @@ const config = {
     // Todo: do we want these?
     '@typescript-eslint/no-explicit-any': 'off',
 
-    '@typescript-eslint/consistent-type-imports': 'error',
     '@typescript-eslint/consistent-type-exports': 'error',
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      {
+        prefer: 'type-imports',
+        fixStyle: 'separate-type-imports',
+        disallowTypeAnnotations: false,
+      },
+    ],
+    'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
 
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',
