@@ -17,8 +17,18 @@ const someMiddleware = t.middleware(({ next }) => {
 });
 
 export function genericRouter<TSchema extends (value: any) => unknown>(schema: TSchema) {
+  const otherSchema= (value: any) => value as unknown
+  t.router({
+    foo: t.procedure.output(otherSchema).query(() => 'bar'),
+  // ^?
+  });
+  t.router({
+    foo: t.procedure.query(() => 'bar'),
+  // ^?
+  });
   return t.router({
     foo: t.procedure.output(schema).query(() => 'bar'),
+  // ^?
   });
 }
 

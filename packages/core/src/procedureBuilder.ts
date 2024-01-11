@@ -1,3 +1,4 @@
+import { stringify } from 'querystring';
 import { getTRPCErrorFromUnknown, TRPCError } from './error/TRPCError';
 import type {
   AnyMiddlewareFunction,
@@ -28,6 +29,9 @@ import { mergeWithoutOverrides } from './utils';
 type IntersectIfDefined<TType, TWith> = UnsetMarker extends TType
   ? TWith
   : Simplify<TType & TWith>;
+// type IntersectIfDefined<TType, TWith> = TType extends UnsetMarker
+//   ? TWith
+//   : Simplify<TType & TWith>;
 
 type ErrorMessage<TMessage extends string> = TMessage;
 
@@ -59,6 +63,15 @@ type AnyProcedureBuilderDef = ProcedureBuilderDef<any>;
 interface ResolverOptions<TContext, _TMeta, TContextOverridesIn, TInputOut> {
   ctx: Simplify<Overwrite<TContext, TContextOverridesIn>>;
   input: TInputOut extends UnsetMarker ? undefined : TInputOut;
+}
+
+function genericRouter<TSchema extends (value: any) => unknown>(
+  schema: TSchema,
+) {
+  type p1 = inferParser<(value: any) => unknown>;
+  //   ^?
+  type p2 = inferParser<TSchema>;
+  //   ^?
 }
 
 /**
@@ -126,6 +139,7 @@ export interface ProcedureBuilder<
     IntersectIfDefined<TOutputIn, inferParser<$Parser>['in']>,
     IntersectIfDefined<TOutputOut, inferParser<$Parser>['out']>
   >;
+
   /**
    * Add a meta data to the procedure.
    * @see https://trpc.io/docs/server/metadata
