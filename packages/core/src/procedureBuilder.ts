@@ -26,12 +26,12 @@ import type {
 import type { GetRawInputFn, MaybePromise, Overwrite, Simplify } from './types';
 import { mergeWithoutOverrides } from './utils';
 
-type IntersectIfDefined<TType, TWith> = UnsetMarker extends TType
-  ? TWith
-  : Simplify<TType & TWith>;
-// type IntersectIfDefined<TType, TWith> = TType extends UnsetMarker
+// type IntersectIfDefined<TType, TWith> = UnsetMarker extends TType
 //   ? TWith
 //   : Simplify<TType & TWith>;
+type IntersectIfDefined<TType, TWith> = TType extends UnsetMarker
+  ? TWith
+  : TType; // Simplify<TType & TWith>;
 
 type ErrorMessage<TMessage extends string> = TMessage;
 
@@ -72,7 +72,11 @@ function genericRouter<TSchema extends (value: any) => unknown>(
   //   ^?
   type p2 = inferParser<TSchema>;
   //   ^?
+
+  return null as any as p2;
 }
+const parser = genericRouter((val: number) => val as string);
+//    ^?
 
 /**
  * A procedure resolver
