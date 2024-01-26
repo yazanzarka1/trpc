@@ -36,7 +36,7 @@ interface UseTRPCActionSuccessResult<TDef extends ActionHandlerDef>
 interface UseTRPCActionErrorResult<TDef extends ActionHandlerDef>
   extends UseTRPCActionBaseResult<TDef> {
   data?: never;
-  error: TRPCClientError<TDef['errorShape']>;
+  error: TRPCClientError<TDef['errorData']>;
   status: 'error';
 }
 
@@ -101,7 +101,7 @@ export function experimental_serverActionLink<
 
 interface UseTRPCActionOptions<TDef extends ActionHandlerDef> {
   onSuccess?: (result: TDef['output']) => MaybePromise<void> | void;
-  onError?: (result: TRPCClientError<TDef['errorShape']>) => MaybePromise<void>;
+  onError?: (result: TRPCClientError<TDef['errorData']>) => MaybePromise<void>;
 }
 
 // ts-prune-ignore-next

@@ -10,4 +10,4 @@ export type inferRootTypes<TInferrable extends TRPCInferrable> =
     : never;
 
 export type inferErrorShape<TInferrable extends TRPCInferrable> =
-  inferRootTypes<TInferrable>['errorShape'];
+  inferRootTypes<TInferrable>['errorData'];

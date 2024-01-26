@@ -68,7 +68,7 @@ export function experimental_createTRPCNextAppDirServer<
  */
 export type TRPCActionHandler<TDef extends ActionHandlerDef> = (
   input: FormData | TDef['input'],
-) => Promise<TRPCResponse<TDef['output'], TDef['errorShape']>>;
+) => Promise<TRPCResponse<TDef['output'], TDef['errorData']>>;
 
 export function experimental_createServerActionHandler<
   TInstance extends {

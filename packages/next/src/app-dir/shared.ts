@@ -88,7 +88,7 @@ export function isFormData(value: unknown): value is FormData {
 export interface ActionHandlerDef {
   input?: any;
   output?: any;
-  errorShape: any;
+  errorData: any;
 }
 
 // ts-prune-ignore-next
@@ -101,5 +101,5 @@ export type inferActionDef<
 > = {
   input: inferProcedureInput<TProc>;
   output: TProc['_def']['_output_out'];
-  errorShape: TRoot['errorShape'];
+  errorData: TRoot['errorData'];
 };

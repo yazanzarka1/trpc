@@ -3,7 +3,6 @@ import {
   defaultFormatter,
   type DefaultErrorShape,
   type ErrorFormatter,
-  type ErrorFormatterShape,
 } from './error/formatter';
 import { createMiddlewareFactory } from './middleware';
 import { createBuilder } from './procedureBuilder';
@@ -24,7 +23,7 @@ interface RuntimeConfigOptions<TContext extends object, TMeta extends object>
       RootConfig<{
         ctx: TContext;
         meta: TMeta;
-        errorShape: any;
+        errorData: any;
         transformer: any;
       }>,
       '$types' | 'transformer'
@@ -66,7 +65,15 @@ class TRPCBuilder<TContext extends object, TMeta extends object> {
     type $Transformer = undefined extends TOptions['transformer']
       ? false
       : true;
-    type $ErrorShape = ErrorFormatterShape<
+
+    type inferErrorData<TFormatter> = TFormatter extends ErrorFormatter<
+      any,
+      infer TErrorData
+    >
+      ? TErrorData
+      : DefaultErrorShape;
+
+    type $ErrorShape = inferErrorData<
       PickFirstDefined<
         TOptions['errorFormatter'],
         ErrorFormatter<TContext, DefaultErrorShape>
@@ -76,7 +83,7 @@ class TRPCBuilder<TContext extends object, TMeta extends object> {
     type $Root = CreateRootTypes<{
       ctx: TContext;
       meta: TMeta;
-      errorShape: $ErrorShape;
+      errorData: $ErrorShape;
       transformer: $Transformer;
     }>;
 

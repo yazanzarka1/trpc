@@ -2,18 +2,18 @@ import type {
   inferErrorShape,
   Maybe,
   TRPCErrorResponse,
+  TRPCErrorShape,
   TRPCInferrable,
 } from '@trpc/server/unstable-core-do-not-import';
 import {
   getCauseFromUnknown,
   isObject,
-  type DefaultErrorShape,
 } from '@trpc/server/unstable-core-do-not-import';
 
-export interface TRPCClientErrorBase<TShape extends DefaultErrorShape> {
+export interface TRPCClientErrorBase<TErrorData extends object> {
   readonly message: string;
-  readonly shape: Maybe<TShape>;
-  readonly data: Maybe<TShape['data']>;
+  readonly shape: Maybe<TRPCErrorShape<TErrorData>>;
+  readonly data: Maybe<TErrorData>;
 }
 export type TRPCClientErrorLike<TInferrable extends TRPCInferrable> =
   TRPCClientErrorBase<inferErrorShape<TInferrable>>;

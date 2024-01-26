@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { getErrorShape } from '../error/getErrorShape';
 import { getTRPCErrorFromUnknown, TRPCError } from '../error/TRPCError';
 import type { ProcedureType } from '../procedure';
@@ -7,7 +8,11 @@ import type {
   inferRouterError,
 } from '../router';
 import { callProcedure } from '../router';
-import type { TRPCResponse } from '../rpc';
+import type {
+  TRPCErrorResponse,
+  TRPCResponse,
+  TRPCSuccessResponse,
+} from '../rpc';
 import { transformTRPCResponse } from '../transformer';
 import type { Maybe } from '../types';
 import type { BaseContentTypeHandler } from './contentType';
@@ -144,7 +149,10 @@ async function inputToProcedureCall<
   type: 'mutation' | 'query';
   input: unknown;
   path: string;
-}): Promise<TRPCResponse<unknown, inferRouterError<TRouter>>> {
+}): Promise<
+  | [null, TRPCSuccessResponse<unknown>]
+  | [TRPCError, TRPCErrorResponse<inferRouterError<TRouter>>]
+> {
   const { opts, ctx, type, input, path } = procedureOpts;
   try {
     const data = await callProcedure({
@@ -154,26 +162,32 @@ async function inputToProcedureCall<
       ctx,
       type,
     });
-    return {
-      result: {
-        data,
+    return [
+      null,
+      {
+        result: {
+          data,
+        },
       },
-    };
+    ];
   } catch (cause) {
     const error = getTRPCErrorFromUnknown(cause);
 
     opts.onError?.({ error, path, input, ctx, type: type, req: opts.req });
 
-    return {
-      error: getErrorShape({
-        config: opts.router._def._config,
-        error,
-        type,
-        path,
-        input,
-        ctx,
-      }),
-    };
+    return [
+      error,
+      {
+        error: getErrorShape({
+          config: opts.router._def._config,
+          error,
+          type,
+          path,
+          input,
+          ctx,
+        }),
+      },
+    ];
   }
 }
 
@@ -343,10 +357,12 @@ export async function resolveHTTPResponse<
        * - return a complete HTTPResponse
        */
 
-      const untransformedJSON = await Promise.all(promises);
-      const errors = untransformedJSON.flatMap((response) =>
-        'error' in response ? [response.error] : [],
-      );
+      const results = await Promise.all(promises);
+      const errors: TRPCError[] = results
+        .filter((it) => it[0] !== null)
+        .map((it) => it[0]!);
+
+      const untransformedJSON = results.map((it) => it[1]);
 
       const headResponse = initResponse({
         ctx,
@@ -359,7 +375,7 @@ export async function resolveHTTPResponse<
       unstable_onHead?.(headResponse, false);
 
       // return body stuff
-      const result = isBatchCall ? untransformedJSON : untransformedJSON[0]!; // eslint-disable-line @typescript-eslint/no-non-null-assertion -- `untransformedJSON` should be the length of `paths` which should be at least 1 otherwise there wouldn't be a request at all
+      const result = isBatchCall ? untransformedJSON : untransformedJSON[0]!;
       const transformedJSON = transformTRPCResponse(
         router._def._config,
         result,
@@ -395,15 +411,13 @@ export async function resolveHTTPResponse<
       ]),
     );
     for (const _ of paths) {
-      const [index, untransformedJSON] = await Promise.race(
-        indexedPromises.values(),
-      );
+      const [index, result] = await Promise.race(indexedPromises.values());
       indexedPromises.delete(index);
 
       try {
         const transformedJSON = transformTRPCResponse(
           router._def._config,
-          untransformedJSON,
+          result[1],
         );
         const body = JSON.stringify(transformedJSON);
 

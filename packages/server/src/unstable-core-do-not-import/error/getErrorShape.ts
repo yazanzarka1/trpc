@@ -15,7 +15,7 @@ export function getErrorShape<TRoot extends AnyRootTypes>(opts: {
   path: string | undefined;
   input: unknown;
   ctx: TRoot['ctx'] | undefined;
-}): TRoot['errorShape'] {
+}): TRoot['errorData'] {
   const { path, error, config } = opts;
   const { code } = opts.error;
   const shape: DefaultErrorShape = {

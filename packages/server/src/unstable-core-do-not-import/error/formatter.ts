@@ -1,29 +1,19 @@
 import type { ProcedureType } from '../procedure';
-import type {
-  TRPC_ERROR_CODE_KEY,
-  TRPC_ERROR_CODE_NUMBER,
-  TRPCErrorShape,
-} from '../rpc';
+import type { TRPC_ERROR_CODE_KEY, TRPCErrorShape } from '../rpc';
 import type { TRPCError } from './TRPCError';
 
 /**
  * @internal
  */
-export type ErrorFormatter<TContext, TShape extends TRPCErrorShape> = (args: {
+export type ErrorFormatter<TContext, TErrorData extends object> = (args: {
   error: TRPCError;
   type: ProcedureType | 'unknown';
   path: string | undefined;
   input: unknown;
   ctx: TContext | undefined;
   shape: DefaultErrorShape;
-}) => TShape;
+}) => TRPCErrorShape<TErrorData>;
 
-export type ErrorFormatterShape<TType> = TType extends ErrorFormatter<
-  any,
-  infer TShape
->
-  ? TShape
-  : DefaultErrorShape;
 /**
  * @internal
  */
@@ -37,10 +27,7 @@ export type DefaultErrorData = {
 /**
  * @internal
  */
-export interface DefaultErrorShape extends TRPCErrorShape<DefaultErrorData> {
-  message: string;
-  code: TRPC_ERROR_CODE_NUMBER;
-}
+export type DefaultErrorShape = TRPCErrorShape<DefaultErrorData>;
 
 export const defaultFormatter: ErrorFormatter<any, any> = ({ shape }) => {
   return shape;

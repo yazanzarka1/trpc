@@ -85,7 +85,7 @@ type inferRouterConfig<TRouter extends AnyRouter> =
 export type inferRouterContext<TRouter extends AnyRouter> =
   inferRouterConfig<TRouter>['$types']['ctx'];
 export type inferRouterError<TRouter extends AnyRouter> =
-  inferRouterConfig<TRouter>['$types']['errorShape'];
+  inferRouterConfig<TRouter>['$types']['errorData'];
 export type inferRouterMeta<TRouter extends AnyRouter> =
   inferRouterConfig<TRouter>['$types']['meta'];
 
@@ -122,7 +122,7 @@ function isRouter(
 
 const emptyRouter = {
   _ctx: null as any,
-  _errorShape: null as any,
+  _errorData: null as any,
   _meta: null as any,
   queries: {},
   mutations: {},

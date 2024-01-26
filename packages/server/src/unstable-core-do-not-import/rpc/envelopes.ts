@@ -5,9 +5,7 @@ import type { TRPC_ERROR_CODE_NUMBER } from './codes';
 /**
  * Error response
  */
-export interface TRPCErrorShape<
-  TData extends Record<string, unknown> = Record<string, unknown>,
-> {
+export interface TRPCErrorShape<TData extends object> {
   code: TRPC_ERROR_CODE_NUMBER;
   message: string;
   data: TData;
@@ -41,9 +39,9 @@ export namespace JSONRPC2 {
     result: TResult;
   }
 
-  export interface ErrorResponse<TError extends TRPCErrorShape = TRPCErrorShape>
+  export interface ErrorResponse<TError extends object = object>
     extends BaseEnvelope {
-    error: TError;
+    error: TRPCErrorShape<TError>;
   }
 }
 
@@ -63,14 +61,12 @@ export interface TRPCSuccessResponse<TData>
     }
   > {}
 
-export interface TRPCErrorResponse<
-  TError extends TRPCErrorShape = TRPCErrorShape,
-> extends JSONRPC2.ErrorResponse<TError> {}
+export interface TRPCErrorResponse<TError extends object = object>
+  extends JSONRPC2.ErrorResponse<TError> {}
 
-export type TRPCResponse<
-  TData = unknown,
-  TError extends TRPCErrorShape = TRPCErrorShape,
-> = TRPCErrorResponse<TError> | TRPCSuccessResponse<TData>;
+export type TRPCResponse<TData = unknown, TError extends object = object> =
+  | TRPCErrorResponse<TError>
+  | TRPCSuccessResponse<TData>;
 
 /////////////////////////// WebSocket envelopes ///////////////////////
 
@@ -107,7 +103,7 @@ export interface TRPCResultMessage<TData>
 
 export type TRPCResponseMessage<
   TData = unknown,
-  TError extends TRPCErrorShape = TRPCErrorShape,
+  TError extends object = object,
 > = { id: JSONRPC2.RequestId } & (
   | TRPCErrorResponse<TError>
   | TRPCResultMessage<TData>
@@ -131,5 +127,5 @@ export type TRPCClientIncomingRequest = TRPCReconnectNotification;
  */
 export type TRPCClientIncomingMessage<
   TResult = unknown,
-  TError extends TRPCErrorShape = TRPCErrorShape,
+  TError extends object = object,
 > = TRPCClientIncomingRequest | TRPCResponseMessage<TResult, TError>;

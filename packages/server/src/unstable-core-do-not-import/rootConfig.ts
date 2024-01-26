@@ -8,7 +8,7 @@ import type { DefaultErrorShape, ErrorFormatter } from './error/formatter';
 export interface RootTypes {
   ctx: object;
   meta: object;
-  errorShape: DefaultErrorShape;
+  errorData: DefaultErrorShape;
   transformer: boolean;
 }
 
@@ -42,7 +42,7 @@ export interface RootConfig<TTypes extends RootTypes> {
    * Use custom error formatting
    * @link https://trpc.io/docs/v11/error-formatting
    */
-  errorFormatter: ErrorFormatter<TTypes['ctx'], TTypes['errorShape']>;
+  errorFormatter: ErrorFormatter<TTypes['ctx'], TTypes['errorData']>;
   /**
    * Allow `@trpc/server` to run in non-server environments
    * @warning **Use with caution**, this should likely mainly be used within testing.
@@ -73,6 +73,6 @@ export type CreateRootTypes<TGenerics extends RootTypes> = TGenerics;
 export type AnyRootTypes = CreateRootTypes<{
   ctx: any;
   meta: any;
-  errorShape: any;
+  errorData: any;
   transformer: any;
 }>;
