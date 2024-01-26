@@ -1,5 +1,5 @@
 import type { CombinedDataTransformer } from '.';
-import type { DefaultErrorShape, ErrorFormatter } from './error/formatter';
+import type { ErrorFormatter } from './error/formatter';
 
 /**
  * The initial generics that are used in the init function
@@ -8,7 +8,7 @@ import type { DefaultErrorShape, ErrorFormatter } from './error/formatter';
 export interface RootTypes {
   ctx: object;
   meta: object;
-  errorData: DefaultErrorShape;
+  errorData: object;
   transformer: boolean;
 }
 

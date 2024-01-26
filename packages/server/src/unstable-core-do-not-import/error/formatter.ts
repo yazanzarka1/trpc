@@ -17,17 +17,25 @@ export type ErrorFormatter<TContext, TErrorData extends object> = (args: {
 /**
  * @internal
  */
-export type DefaultErrorData = {
+export interface DefaultErrorData {
   code: TRPC_ERROR_CODE_KEY;
   httpStatus: number;
+  /**
+   * The path of the procedure that failed
+   */
   path?: string;
+  /**
+   * The stack trace of the error (only in dev mode)
+   */
   stack?: string;
-};
+}
 
 /**
  * @internal
  */
-export type DefaultErrorShape = TRPCErrorShape<DefaultErrorData>;
+export interface DefaultErrorShape extends TRPCErrorShape<DefaultErrorData> {
+  //
+}
 
 export const defaultFormatter: ErrorFormatter<any, any> = ({ shape }) => {
   return shape;

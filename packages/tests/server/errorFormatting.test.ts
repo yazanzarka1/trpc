@@ -44,6 +44,7 @@ describe('no custom error formatter', () => {
     if (!isTRPCClientError<typeof appRouter>(err)) {
       throw new Error('Bad');
     }
+
     expectTypeOf(err.data).not.toBeAny();
     expectTypeOf(err.shape).not.toBeAny();
     expectTypeOf(err.data!).toEqualTypeOf<DefaultErrorData>();

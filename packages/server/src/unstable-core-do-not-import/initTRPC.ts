@@ -1,4 +1,5 @@
 import { createFlatProxy } from './createProxy';
+import type { DefaultErrorData } from './error/formatter';
 import {
   defaultFormatter,
   type DefaultErrorShape,
@@ -76,7 +77,7 @@ class TRPCBuilder<TContext extends object, TMeta extends object> {
     type $ErrorShape = inferErrorData<
       PickFirstDefined<
         TOptions['errorFormatter'],
-        ErrorFormatter<TContext, DefaultErrorShape>
+        ErrorFormatter<TContext, DefaultErrorData>
       >
     >;
 
