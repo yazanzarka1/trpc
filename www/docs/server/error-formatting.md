@@ -76,9 +76,9 @@ interface DefaultErrorData {
   stack?: string;
 }
 
-interface DefaultErrorShape
-  extends TRPCErrorShape<TRPC_ERROR_CODE_NUMBER, DefaultErrorData> {
+interface DefaultErrorShape extends TRPCErrorShape<DefaultErrorData> {
   message: string;
   code: TRPC_ERROR_CODE_NUMBER;
+  data: DefaultErrorData;
 }
 ```

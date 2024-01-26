@@ -9,5 +9,5 @@ export type inferRootTypes<TInferrable extends TRPCInferrable> =
     ? TInferrable['_def']['_config']['$types']
     : never;
 
-export type inferErrorShape<TInferrable extends TRPCInferrable> =
+export type inferErrorData<TInferrable extends TRPCInferrable> =
   inferRootTypes<TInferrable>['errorData'];

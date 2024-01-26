@@ -1,5 +1,5 @@
 import type {
-  inferErrorShape,
+  inferErrorData,
   Maybe,
   TRPCErrorResponse,
   TRPCErrorShape,
@@ -16,7 +16,7 @@ export interface TRPCClientErrorBase<TErrorData extends object> {
   readonly data: Maybe<TErrorData>;
 }
 export type TRPCClientErrorLike<TInferrable extends TRPCInferrable> =
-  TRPCClientErrorBase<inferErrorShape<TInferrable>>;
+  TRPCClientErrorBase<inferErrorData<TInferrable>>;
 
 function isTRPCClientError(cause: unknown): cause is TRPCClientError<any> {
   return (
@@ -40,13 +40,15 @@ function isTRPCErrorResponse(obj: unknown): obj is TRPCErrorResponse<any> {
 
 export class TRPCClientError<TRouterOrProcedure extends TRPCInferrable>
   extends Error
-  implements TRPCClientErrorBase<inferErrorShape<TRouterOrProcedure>>
+  implements TRPCClientErrorBase<inferErrorData<TRouterOrProcedure>>
 {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore override doesn't work in all environments due to "This member cannot have an 'override' modifier because it is not declared in the base class 'Error'"
   public override readonly cause;
-  public readonly shape: Maybe<inferErrorShape<TRouterOrProcedure>>;
-  public readonly data: Maybe<inferErrorShape<TRouterOrProcedure>['data']>;
+  public readonly shape: Maybe<
+    TRPCErrorShape<inferErrorData<TRouterOrProcedure>>
+  >;
+  public readonly data: Maybe<inferErrorData<TRouterOrProcedure>>;
 
   /**
    * Additional meta data about the error
@@ -57,7 +59,7 @@ export class TRPCClientError<TRouterOrProcedure extends TRPCInferrable>
   constructor(
     message: string,
     opts?: {
-      result?: Maybe<TRPCErrorResponse<inferErrorShape<TRouterOrProcedure>>>;
+      result?: Maybe<TRPCErrorResponse<inferErrorData<TRouterOrProcedure>>>;
       cause?: Error;
       meta?: Record<string, unknown>;
     },

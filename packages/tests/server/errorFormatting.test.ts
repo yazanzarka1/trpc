@@ -46,8 +46,8 @@ describe('no custom error formatter', () => {
     }
     expectTypeOf(err.data).not.toBeAny();
     expectTypeOf(err.shape).not.toBeAny();
-    expectTypeOf(err.data!).toMatchTypeOf<DefaultErrorData>();
-    expectTypeOf(err.shape!).toMatchTypeOf<DefaultErrorShape>();
+    expectTypeOf(err.data!).toEqualTypeOf<DefaultErrorData>();
+    expectTypeOf(err.shape!).toEqualTypeOf<DefaultErrorShape>();
   });
 });
 
