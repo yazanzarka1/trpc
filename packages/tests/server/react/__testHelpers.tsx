@@ -81,10 +81,13 @@ export function createAppRouter() {
   const t = initTRPC.create({
     errorFormatter({ shape, error }) {
       return {
-        $test: 'formatted',
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
         ...shape,
+        data: {
+          ...shape.data,
+          $test: 'formatted',
+          zodError:
+            error.cause instanceof ZodError ? error.cause.flatten() : null,
+        },
       };
     },
   });

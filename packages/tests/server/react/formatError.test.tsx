@@ -1,6 +1,9 @@
 import { createAppRouter } from './__testHelpers';
 import { render, waitFor } from '@testing-library/react';
-import type { DefaultErrorShape } from '@trpc/server/unstable-core-do-not-import';
+import type {
+  DefaultErrorData,
+  DefaultErrorShape,
+} from '@trpc/server/unstable-core-do-not-import';
 import React, { useEffect } from 'react';
 
 let factory: ReturnType<typeof createAppRouter>;
@@ -15,27 +18,26 @@ test('react types test', async () => {
   const { trpc, App } = factory;
   function MyComponent() {
     const mutation = trpc.addPost.useMutation();
-    factory.appRouter._def._config.$types;
 
     useEffect(() => {
       mutation.mutate({ title: 123 as any });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    if (mutation.error?.shape) {
-      expectTypeOf(mutation.error.shape).toMatchTypeOf<
-        DefaultErrorShape & {
+    if (mutation.error?.data) {
+      expectTypeOf(mutation.error.data).toMatchTypeOf<
+        DefaultErrorData & {
           $test: string;
         }
       >();
-      expectTypeOf(mutation.error.shape).toMatchTypeOf<
-        DefaultErrorShape & {
+      expectTypeOf(mutation.error.data).toMatchTypeOf<
+        DefaultErrorData & {
           $test: string;
         }
       >();
       return (
         <pre data-testid="err">
-          {JSON.stringify(mutation.error.shape.zodError, null, 2)}
+          {JSON.stringify(mutation.error.data.zodError, null, 2)}
         </pre>
       );
     }

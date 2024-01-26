@@ -7,6 +7,7 @@ import type {
   DefaultErrorShape,
 } from '@trpc/server/unstable-core-do-not-import';
 import { konn } from 'konn';
+import { init } from 'next/dist/compiled/webpack/webpack';
 import { z, ZodError } from 'zod';
 
 function isTRPCClientError<TRouter extends AnyRouter>(
@@ -265,5 +266,17 @@ describe('zod errors according to docs', () => {
 
     // good
     expect(await ctx.client.greeting.query(10)).toBe(10);
+  });
+});
+
+test('no extra props on shape', () => {
+  const t = initTRPC.create({
+    errorFormatter(opts) {
+      return {
+        ...opts.shape,
+        // @ts-expect-error extra prop
+        foo: 'bar',
+      };
+    },
   });
 });

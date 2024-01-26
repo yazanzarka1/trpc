@@ -5,7 +5,7 @@ import type { TRPCError } from './TRPCError';
 /**
  * @internal
  */
-export type ErrorFormatter<TContext, TErrorData extends object> = (args: {
+export type ErrorFormatter<TContext, TErrorData extends object> = (opts: {
   error: TRPCError;
   type: ProcedureType | 'unknown';
   path: string | undefined;
