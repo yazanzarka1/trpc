@@ -87,8 +87,8 @@ class TRPCBuilder<TContext extends object, TMeta extends object> {
    * @link https://trpc.io/docs/v11/server/routers#initialize-trpc
    */
   create<
-    TTransformer extends boolean = false,
     TErrorData extends object = DefaultErrorData,
+    TTransformer extends boolean = false,
   >(opts?: RuntimeConfigOptions<TContext, TMeta, TErrorData, TTransformer>) {
     type $Root = CreateRootTypes<{
       ctx: TContext;

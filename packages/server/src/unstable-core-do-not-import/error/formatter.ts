@@ -37,6 +37,4 @@ export interface DefaultErrorShape extends TRPCErrorShape<DefaultErrorData> {
   //
 }
 
-export const defaultFormatter: ErrorFormatter<any, any> = ({ shape }) => {
-  return shape;
-};
+export const defaultFormatter: ErrorFormatter<any, any> = (opts) => opts.shape;
