@@ -8,11 +8,7 @@ import type {
   inferRouterError,
 } from '../router';
 import { callProcedure } from '../router';
-import type {
-  TRPCErrorResponse,
-  TRPCResponse,
-  TRPCSuccessResponse,
-} from '../rpc';
+import type { TRPCResponse } from '../rpc';
 import { transformTRPCResponse } from '../transformer';
 import type { Maybe } from '../types';
 import type { BaseContentTypeHandler } from './contentType';
@@ -136,61 +132,6 @@ function initResponse<
     headers,
   };
 }
-
-async function inputToProcedureCall<
-  TRouter extends AnyRouter,
-  TRequest extends HTTPRequest,
->(procedureOpts: {
-  opts: Pick<
-    ResolveHTTPRequestOptions<TRouter, TRequest>,
-    'onError' | 'req' | 'router'
-  >;
-  ctx: inferRouterContext<TRouter> | undefined;
-  type: 'mutation' | 'query';
-  input: unknown;
-  path: string;
-}): Promise<
-  | [null, TRPCSuccessResponse<unknown>]
-  | [TRPCError, TRPCErrorResponse<inferRouterError<TRouter>>]
-> {
-  const { opts, ctx, type, input, path } = procedureOpts;
-  try {
-    const data = await callProcedure({
-      procedures: opts.router._def.procedures,
-      path,
-      getRawInput: async () => input,
-      ctx,
-      type,
-    });
-    return [
-      null,
-      {
-        result: {
-          data,
-        },
-      },
-    ];
-  } catch (cause) {
-    const error = getTRPCErrorFromUnknown(cause);
-
-    opts.onError?.({ error, path, input, ctx, type: type, req: opts.req });
-
-    return [
-      error,
-      {
-        error: getErrorShape({
-          config: opts.router._def._config,
-          error,
-          type,
-          path,
-          input,
-          ctx,
-        }),
-      },
-    ];
-  }
-}
-
 function caughtErrorToData<
   TRouter extends AnyRouter,
   TRequest extends HTTPRequest,
@@ -345,9 +286,41 @@ export async function resolveHTTPResponse<
       })),
     };
     ctx = await opts.createContext({ info });
-    const promises = paths.map((path, index) =>
-      inputToProcedureCall({ opts, ctx, type, input: inputs[index], path }),
-    );
+
+    const errors: TRPCError[] = [];
+    const promises: Promise<
+      TRPCResponse<unknown, inferRouterError<TRouter>>
+    >[] = paths.map(async (path, index) => {
+      const input = inputs[index];
+      try {
+        const data = await callProcedure({
+          procedures: opts.router._def.procedures,
+          path,
+          getRawInput: async () => input,
+          ctx,
+          type,
+        });
+        return {
+          result: {
+            data,
+          },
+        };
+      } catch (cause) {
+        const error = getTRPCErrorFromUnknown(cause);
+        errors.push(error);
+
+        opts.onError?.({ error, path, input, ctx, type: type, req: opts.req });
+
+        return getErrorShape({
+          config: opts.router._def._config,
+          error,
+          type,
+          path,
+          input,
+          ctx,
+        });
+      }
+    });
 
     if (!isStreamCall) {
       /**
@@ -357,12 +330,7 @@ export async function resolveHTTPResponse<
        * - return a complete HTTPResponse
        */
 
-      const results = await Promise.all(promises);
-      const errors: TRPCError[] = results
-        .filter((it) => it[0] !== null)
-        .map((it) => it[0]!);
-
-      const untransformedJSON = results.map((it) => it[1]);
+      const untransformedJSON = await Promise.all(promises);
 
       const headResponse = initResponse({
         ctx,
@@ -417,7 +385,7 @@ export async function resolveHTTPResponse<
       try {
         const transformedJSON = transformTRPCResponse(
           router._def._config,
-          result[1],
+          result,
         );
         const body = JSON.stringify(transformedJSON);
 
