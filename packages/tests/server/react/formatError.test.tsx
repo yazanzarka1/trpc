@@ -15,6 +15,7 @@ test('react types test', async () => {
   const { trpc, App } = factory;
   function MyComponent() {
     const mutation = trpc.addPost.useMutation();
+    factory.appRouter._def._config.$types;
 
     useEffect(() => {
       mutation.mutate({ title: 123 as any });

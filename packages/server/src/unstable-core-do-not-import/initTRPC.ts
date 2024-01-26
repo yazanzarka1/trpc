@@ -1,10 +1,6 @@
 import { createFlatProxy } from './createProxy';
 import type { DefaultErrorData } from './error/formatter';
-import {
-  defaultFormatter,
-  type DefaultErrorShape,
-  type ErrorFormatter,
-} from './error/formatter';
+import { defaultFormatter, type ErrorFormatter } from './error/formatter';
 import { createMiddlewareFactory } from './middleware';
 import { createBuilder } from './procedureBuilder';
 import type { CreateRootTypes } from './rootConfig';
@@ -16,26 +12,58 @@ import {
 } from './router';
 import type { DataTransformerOptions } from './transformer';
 import { defaultTransformer, getDataTransformer } from './transformer';
-import type { PickFirstDefined, Unwrap, ValidateShape } from './types';
+import type { Unwrap } from './types';
 
-interface RuntimeConfigOptions<TContext extends object, TMeta extends object>
-  extends Partial<
-    Omit<
-      RootConfig<{
-        ctx: TContext;
-        meta: TMeta;
-        errorData: any;
-        transformer: any;
-      }>,
-      '$types' | 'transformer'
-    >
-  > {
-  /**
-   * Use a data transformer
-   * @link https://trpc.io/docs/v11/data-transformers
-   */
-  transformer?: DataTransformerOptions;
-}
+type ErrorFormatterOptions<TContext, TErrorData extends object> =
+  | {
+      /**
+       * Use custom error formatting
+       * @link https://trpc.io/docs/v11/error-formatting
+       */
+      errorFormatter?: ErrorFormatter<TContext, DefaultErrorData>;
+    }
+  | {
+      /**
+       * Use custom error formatting
+       * @link https://trpc.io/docs/v11/error-formatting
+       */
+      errorFormatter: ErrorFormatter<TContext, TErrorData>;
+    };
+type TransformerOptions<TTransformer extends boolean> =
+  TTransformer extends true
+    ? {
+        /**
+         * Use a data transformer
+         * @link https://trpc.io/docs/v11/data-transformers
+         */
+        transformer: DataTransformerOptions;
+      }
+    : {
+        /**
+         * Use a data transformer
+         * @link https://trpc.io/docs/v11/data-transformers
+         */
+        transformer?: DataTransformerOptions;
+      };
+
+type RuntimeConfigOptions<
+  TContext extends object,
+  TMeta extends object,
+  TErrorData extends object,
+  TTransformer extends boolean,
+> = Partial<
+  Omit<
+    RootConfig<{
+      ctx: TContext;
+      meta: TMeta;
+      errorData: any;
+      transformer: any;
+    }>,
+    '$types' | 'transformer' | 'errorFormatter'
+  >
+> &
+  TransformerOptions<TTransformer> &
+  ErrorFormatterOptions<TContext, TErrorData>;
 
 class TRPCBuilder<TContext extends object, TMeta extends object> {
   /**
@@ -58,47 +86,29 @@ class TRPCBuilder<TContext extends object, TMeta extends object> {
    * Create the root object
    * @link https://trpc.io/docs/v11/server/routers#initialize-trpc
    */
-  create<TOptions extends RuntimeConfigOptions<TContext, TMeta>>(
-    opts?:
-      | ValidateShape<TOptions, RuntimeConfigOptions<TContext, TMeta>>
-      | undefined,
-  ) {
-    type $Transformer = undefined extends TOptions['transformer']
-      ? false
-      : true;
-
-    type inferErrorData<TFormatter> = TFormatter extends ErrorFormatter<
-      any,
-      infer TErrorData
-    >
-      ? TErrorData
-      : DefaultErrorShape;
-
-    type $ErrorShape = inferErrorData<
-      PickFirstDefined<
-        TOptions['errorFormatter'],
-        ErrorFormatter<TContext, DefaultErrorData>
-      >
-    >;
-
+  create<
+    TTransformer extends boolean = false,
+    TErrorData extends object = DefaultErrorData,
+  >(opts?: RuntimeConfigOptions<TContext, TMeta, TErrorData, TTransformer>) {
     type $Root = CreateRootTypes<{
       ctx: TContext;
       meta: TMeta;
-      errorData: $ErrorShape;
-      transformer: $Transformer;
+      errorData: TErrorData;
+      transformer: TTransformer;
     }>;
 
-    const errorFormatter = opts?.errorFormatter ?? defaultFormatter;
+    const errorFormatter: ErrorFormatter<TContext, any> =
+      opts?.errorFormatter ?? defaultFormatter;
     const transformer = getDataTransformer(
       opts?.transformer ?? defaultTransformer,
     );
 
+    const NODE_ENV = globalThis.process?.env?.NODE_ENV;
+    const isDev: boolean = opts?.isDev ?? NODE_ENV !== 'production';
+
     const config: RootConfig<$Root> = {
       transformer,
-      isDev:
-        opts?.isDev ??
-        // eslint-disable-next-line @typescript-eslint/dot-notation
-        globalThis.process?.env?.['NODE_ENV'] !== 'production',
+      isDev,
       allowOutsideOfServer: opts?.allowOutsideOfServer ?? false,
       errorFormatter,
       isServer: opts?.isServer ?? isServerDefault,

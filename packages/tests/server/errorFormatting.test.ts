@@ -65,6 +65,8 @@ describe('with custom error formatter', () => {
     },
   });
 
+  t._config.$types.errorData;
+
   const appRouter = t.router({
     greeting: t.procedure.query(() => {
       if (Math.random() >= 0) {
