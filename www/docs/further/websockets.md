@@ -173,7 +173,7 @@ export const trpc = createTRPCClient<AppRouter>({
 });
 ```
 
-### Automatic tracking of id using `tracked()` (recommended)
+## Automatic tracking of id using `tracked()` (recommended)
 
 If you `yield` an event using our `tracked()`-helper and include an `id`, the client will automatically reconnect when it gets disconnected and send the last known ID when reconnecting as part of the `lastEventId`-input.
 
